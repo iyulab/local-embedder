@@ -51,7 +51,6 @@ internal sealed class OnnxInferenceEngine : IDisposable
     public float[] RunInference(long[] inputIds, long[] attentionMask)
     {
         int seqLength = inputIds.Length;
-        var shape = new long[] { 1, seqLength };
 
         // Create input tensors
         var inputIdsTensor = new DenseTensor<long>(inputIds, [1, seqLength]);
