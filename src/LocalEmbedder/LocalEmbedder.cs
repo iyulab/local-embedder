@@ -65,6 +65,7 @@ public static class LocalEmbedder
 
             var modelDir = await downloader.DownloadModelAsync(
                 modelInfo.RepoId,
+                subfolder: modelInfo.Subfolder,
                 progress: progress);
 
             modelPath = Path.Combine(modelDir, "model.onnx");

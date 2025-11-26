@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/iyulab/local-embedder/actions/workflows/ci.yml/badge.svg)](https://github.com/iyulab/local-embedder/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/LocalEmbedder.svg)](https://www.nuget.org/packages/LocalEmbedder)
+[![Downloads](https://img.shields.io/nuget/dt/LocalEmbedder.svg)](https://www.nuget.org/packages/LocalEmbedder)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A simple, high-performance .NET library for local text embeddings with automatic model downloading from HuggingFace.

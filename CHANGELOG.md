@@ -20,10 +20,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Existing code continues to work (backward compatible)
   - Explicit `Provider = ExecutionProvider.Cpu` still works for CPU-only scenarios
 
+### Fixed
+- **HuggingFace Model Download 404 Errors** ([Issue #7](https://github.com/iyulab/local-embedder/issues/7))
+  - Fixed model.onnx download failures for sentence-transformers models
+  - Added `Subfolder` property to `ModelInfo` to support ONNX files in subdirectories
+  - Updated ModelRegistry to specify `Subfolder = "onnx"` for sentence-transformers models
+  - Enhanced HuggingFaceDownloader with intelligent file routing:
+    - Required files (model.onnx, config.json) downloaded from subfolder when specified
+    - Tokenizer files always downloaded from repository root
+  - Backward compatible: Models without subfolder continue to work
+
 ### Technical Details
 - Added `TryAppendCudaProvider()`, `TryAppendDirectMLProvider()`, `TryAppendCoreMLProvider()` helper methods
 - Auto provider uses graceful fallback chain for maximum compatibility
 - Platform detection using `OperatingSystem.IsWindows()` and `OperatingSystem.IsMacOS()`
+- Added `Subfolder` parameter to `DownloadModelAsync()` and `DownloadFileAsync()` methods
+- Smart URL construction: `{repo}/resolve/{revision}/{subfolder}/{filename}`
 
 ### Migration Guide
 ```csharp

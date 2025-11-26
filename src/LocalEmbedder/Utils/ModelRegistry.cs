@@ -14,7 +14,8 @@ internal static class ModelRegistry
             MaxSequenceLength = 256,
             PoolingMode = PoolingMode.Mean,
             DoLowerCase = true,
-            Description = "Fast, good quality, English"
+            Description = "Fast, good quality, English",
+            Subfolder = "onnx"
         },
         ["all-mpnet-base-v2"] = new ModelInfo
         {
@@ -23,7 +24,8 @@ internal static class ModelRegistry
             MaxSequenceLength = 384,
             PoolingMode = PoolingMode.Mean,
             DoLowerCase = true,
-            Description = "Higher quality, English"
+            Description = "Higher quality, English",
+            Subfolder = "onnx"
         },
         ["bge-small-en-v1.5"] = new ModelInfo
         {
@@ -88,4 +90,5 @@ internal sealed record ModelInfo
     public required PoolingMode PoolingMode { get; init; }
     public required bool DoLowerCase { get; init; }
     public string? Description { get; init; }
+    public string? Subfolder { get; init; }  // Optional subfolder path (e.g., "onnx")
 }

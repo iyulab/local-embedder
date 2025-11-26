@@ -37,6 +37,7 @@ internal sealed class HuggingFaceDownloader : IDisposable
     public async Task<string> DownloadModelAsync(
         string repoId,
         string revision = "main",
+        string? subfolder = null,
         IProgress<DownloadProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -61,17 +62,17 @@ internal sealed class HuggingFaceDownloader : IDisposable
             "1_Pooling/config.json"
         };
 
-        // Download required files
+        // Download required files (may be in subfolder)
         foreach (var file in requiredFiles)
         {
             var localPath = Path.Combine(modelDir, file);
             if (!File.Exists(localPath))
             {
-                await DownloadFileAsync(repoId, file, localPath, revision, progress, cancellationToken);
+                await DownloadFileAsync(repoId, file, localPath, revision, subfolder, progress, cancellationToken);
             }
         }
 
-        // Download optional files (ignore failures)
+        // Download optional files (always at root level, no subfolder)
         foreach (var file in optionalFiles)
         {
             var localPath = Path.Combine(modelDir, file);
@@ -79,7 +80,7 @@ internal sealed class HuggingFaceDownloader : IDisposable
             {
                 try
                 {
-                    await DownloadFileAsync(repoId, file, localPath, revision, progress, cancellationToken);
+                    await DownloadFileAsync(repoId, file, localPath, revision, null, progress, cancellationToken);
                 }
                 catch (HttpRequestException)
                 {
@@ -99,6 +100,7 @@ internal sealed class HuggingFaceDownloader : IDisposable
         string filename,
         string destinationPath,
         string revision = "main",
+        string? subfolder = null,
         IProgress<DownloadProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -110,7 +112,7 @@ internal sealed class HuggingFaceDownloader : IDisposable
         }
 
         // Build URL using resolve endpoint (handles LFS automatically)
-        var url = $"{HuggingFaceBaseUrl}/{repoId}/resolve/{revision}/{filename}";
+        var url = $"{HuggingFaceBaseUrl}/{repoId}/resolve/{revision}/{(string.IsNullOrEmpty(subfolder) ? "" : subfolder + "/")}{filename}";
 
         var tempPath = destinationPath + ".part";
         long startPosition = 0;
