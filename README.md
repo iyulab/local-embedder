@@ -74,18 +74,24 @@ var model = await LocalEmbedder.LoadAsync("all-MiniLM-L6-v2", new EmbedderOption
     CacheDirectory = "./models",           // Model cache location
     MaxSequenceLength = 512,               // Max tokens
     NormalizeEmbeddings = true,            // L2 normalization
-    Provider = ExecutionProvider.Cuda      // GPU acceleration
+    Provider = ExecutionProvider.Auto      // Auto-select best (default)
 });
 ```
 
 ### Execution Providers
 
 ```csharp
-ExecutionProvider.Cpu       // Default, works everywhere
+ExecutionProvider.Auto      // Default - automatically selects best available
+ExecutionProvider.Cpu       // CPU only
 ExecutionProvider.Cuda      // NVIDIA GPU
 ExecutionProvider.DirectML  // Windows GPU (AMD, Intel, NVIDIA)
 ExecutionProvider.CoreML    // Apple Silicon
 ```
+
+The default `Auto` provider automatically selects:
+1. **CUDA** if NVIDIA GPU is available (highest performance)
+2. **DirectML** on Windows or **CoreML** on macOS if supported
+3. **CPU** as fallback (always available)
 
 ## Advanced Usage
 

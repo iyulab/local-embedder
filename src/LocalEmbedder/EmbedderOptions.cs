@@ -25,9 +25,9 @@ public sealed class EmbedderOptions
 
     /// <summary>
     /// Gets or sets the execution provider for inference.
-    /// Defaults to CPU.
+    /// Defaults to Auto (automatically selects the best available provider).
     /// </summary>
-    public ExecutionProvider Provider { get; set; } = ExecutionProvider.Cpu;
+    public ExecutionProvider Provider { get; set; } = ExecutionProvider.Auto;
 
     /// <summary>
     /// Gets or sets the pooling mode for sentence embeddings.
@@ -57,7 +57,14 @@ public sealed class EmbedderOptions
 public enum ExecutionProvider
 {
     /// <summary>
-    /// CPU execution (default, works everywhere).
+    /// Automatically select the best available provider.
+    /// Selection order: CUDA → DirectML (Windows) / CoreML (macOS) → CPU.
+    /// This is the recommended default for zero-configuration usage.
+    /// </summary>
+    Auto,
+
+    /// <summary>
+    /// CPU execution (works everywhere).
     /// </summary>
     Cpu,
 

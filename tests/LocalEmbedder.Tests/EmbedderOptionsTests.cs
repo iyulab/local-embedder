@@ -10,7 +10,7 @@ public class EmbedderOptionsTests
         Assert.Null(options.CacheDirectory);
         Assert.Equal(512, options.MaxSequenceLength);
         Assert.True(options.NormalizeEmbeddings);
-        Assert.Equal(ExecutionProvider.Cpu, options.Provider);
+        Assert.Equal(ExecutionProvider.Auto, options.Provider);
         Assert.Equal(PoolingMode.Mean, options.PoolingMode);
         Assert.True(options.DoLowerCase);
     }

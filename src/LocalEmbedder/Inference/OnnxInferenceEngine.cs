@@ -155,6 +155,25 @@ internal sealed class OnnxInferenceEngine : IDisposable
         // Configure execution provider
         switch (provider)
         {
+            case ExecutionProvider.Auto:
+                // Automatically select the best available provider
+                // Priority: CUDA → DirectML (Windows) / CoreML (macOS) → CPU
+
+                // Try CUDA first (highest performance)
+                if (TryAppendCudaProvider(options))
+                    break;
+
+                // Try platform-specific GPU acceleration
+                if (OperatingSystem.IsWindows() && TryAppendDirectMLProvider(options))
+                    break;
+
+                if (OperatingSystem.IsMacOS() && TryAppendCoreMLProvider(options))
+                    break;
+
+                // Fallback to CPU (always available)
+                options.AppendExecutionProvider_CPU(1);
+                break;
+
             case ExecutionProvider.Cuda:
                 try
                 {
@@ -198,6 +217,59 @@ internal sealed class OnnxInferenceEngine : IDisposable
         }
 
         return options;
+    }
+
+    /// <summary>
+    /// Attempts to append CUDA execution provider.
+    /// </summary>
+    private static bool TryAppendCudaProvider(SessionOptions options)
+    {
+        try
+        {
+            options.AppendExecutionProvider_CUDA(0);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Attempts to append DirectML execution provider (Windows GPU).
+    /// </summary>
+    private static bool TryAppendDirectMLProvider(SessionOptions options)
+    {
+        try
+        {
+            options.EnableMemoryPattern = false;
+            options.ExecutionMode = ExecutionMode.ORT_SEQUENTIAL;
+            options.AppendExecutionProvider_DML(0);
+            return true;
+        }
+        catch
+        {
+            // Restore settings if DML fails
+            options.EnableMemoryPattern = true;
+            options.ExecutionMode = ExecutionMode.ORT_SEQUENTIAL;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Attempts to append CoreML execution provider (Apple Silicon / macOS).
+    /// </summary>
+    private static bool TryAppendCoreMLProvider(SessionOptions options)
+    {
+        try
+        {
+            options.AppendExecutionProvider_CoreML();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public void Dispose()

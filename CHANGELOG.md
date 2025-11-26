@@ -5,6 +5,45 @@ All notable changes to LocalEmbedder will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-01-XX
+
+### Added
+- **ExecutionProvider.Auto** - Zero-configuration GPU acceleration
+  - Automatically selects the best available execution provider
+  - Selection priority: CUDA → DirectML (Windows) / CoreML (macOS) → CPU
+  - Eliminates need for manual provider configuration
+  - Maximizes performance out-of-the-box
+
+### Changed
+- **Default ExecutionProvider changed from Cpu to Auto**
+  - Users now get automatic GPU acceleration when available
+  - Existing code continues to work (backward compatible)
+  - Explicit `Provider = ExecutionProvider.Cpu` still works for CPU-only scenarios
+
+### Technical Details
+- Added `TryAppendCudaProvider()`, `TryAppendDirectMLProvider()`, `TryAppendCoreMLProvider()` helper methods
+- Auto provider uses graceful fallback chain for maximum compatibility
+- Platform detection using `OperatingSystem.IsWindows()` and `OperatingSystem.IsMacOS()`
+
+### Migration Guide
+```csharp
+// Before (v0.2.0) - CPU only by default
+await using var model = await LocalEmbedder.LoadAsync("model-id");
+// ^ Used CPU even if GPU was available
+
+// After (v0.3.0) - Auto GPU acceleration
+await using var model = await LocalEmbedder.LoadAsync("model-id");
+// ^ Automatically uses GPU if available, falls back to CPU
+
+// Force CPU-only if needed
+await using var model = await LocalEmbedder.LoadAsync("model-id", new EmbedderOptions
+{
+    Provider = ExecutionProvider.Cpu
+});
+```
+
+---
+
 ## [0.2.0] - 2025-01-XX
 
 ### Added

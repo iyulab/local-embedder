@@ -168,7 +168,7 @@ Configuration options for loading models.
 | `CacheDirectory` | `string?` | null (uses default) | Model cache directory |
 | `MaxSequenceLength` | `int` | 512 | Maximum tokens per input |
 | `NormalizeEmbeddings` | `bool` | true | L2 normalize output |
-| `Provider` | `ExecutionProvider` | Cpu | Hardware acceleration |
+| `Provider` | `ExecutionProvider` | Auto | Hardware acceleration (auto-selects best) |
 | `PoolingMode` | `PoolingMode` | Mean | Embedding pooling strategy |
 | `DoLowerCase` | `bool` | true | Lowercase input text |
 
@@ -188,10 +188,16 @@ Hardware acceleration options.
 
 | Value | Description |
 |-------|-------------|
-| `Cpu` | CPU execution (default, works everywhere) |
+| `Auto` | Automatically select best available (default). Priority: CUDA → DirectML/CoreML → CPU |
+| `Cpu` | CPU execution (works everywhere) |
 | `Cuda` | NVIDIA CUDA acceleration |
 | `DirectML` | Windows DirectML (AMD/Intel/NVIDIA) |
 | `CoreML` | Apple CoreML (macOS/iOS) |
+
+**Auto Selection Logic:**
+1. Tries CUDA first (highest performance for NVIDIA GPUs)
+2. Falls back to DirectML on Windows or CoreML on macOS
+3. Uses CPU if no GPU acceleration is available
 
 ---
 
