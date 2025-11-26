@@ -34,7 +34,8 @@ internal static class ModelRegistry
             MaxSequenceLength = 512,
             PoolingMode = PoolingMode.Cls,
             DoLowerCase = true,
-            Description = "BAAI, English"
+            Description = "BAAI, English",
+            Subfolder = "onnx"
         },
         ["bge-base-en-v1.5"] = new ModelInfo
         {
@@ -43,7 +44,8 @@ internal static class ModelRegistry
             MaxSequenceLength = 512,
             PoolingMode = PoolingMode.Cls,
             DoLowerCase = true,
-            Description = "BAAI, English, higher quality"
+            Description = "BAAI, English, higher quality",
+            Subfolder = "onnx"
         },
         ["multilingual-e5-small"] = new ModelInfo
         {
@@ -52,7 +54,8 @@ internal static class ModelRegistry
             MaxSequenceLength = 512,
             PoolingMode = PoolingMode.Mean,
             DoLowerCase = false,
-            Description = "Multilingual"
+            Description = "Multilingual",
+            Subfolder = "onnx"
         },
         ["multilingual-e5-base"] = new ModelInfo
         {
@@ -61,7 +64,8 @@ internal static class ModelRegistry
             MaxSequenceLength = 512,
             PoolingMode = PoolingMode.Mean,
             DoLowerCase = false,
-            Description = "Multilingual, higher quality"
+            Description = "Multilingual, higher quality",
+            Subfolder = "onnx"
         }
     };
 

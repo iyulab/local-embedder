@@ -45,35 +45,26 @@ internal sealed class HuggingFaceDownloader : IDisposable
         var modelDir = GetModelDirectory(repoId, revision);
         Directory.CreateDirectory(modelDir);
 
-        // Required files for embedding models
-        var requiredFiles = new[]
+        // Model file - may be in subfolder (e.g., sentence-transformers use /onnx subfolder)
+        var modelFile = "model.onnx";
+        var modelPath = Path.Combine(modelDir, modelFile);
+        if (!File.Exists(modelPath))
         {
-            "model.onnx",
-            "config.json"
-        };
-
-        // Optional files (different models use different tokenizer formats)
-        var optionalFiles = new[]
-        {
-            "vocab.txt",  // Used by some models (e.g., BERT-based)
-            "tokenizer.json",  // Used by sentence-transformers models
-            "tokenizer_config.json",
-            "special_tokens_map.json",
-            "1_Pooling/config.json"
-        };
-
-        // Download required files (may be in subfolder)
-        foreach (var file in requiredFiles)
-        {
-            var localPath = Path.Combine(modelDir, file);
-            if (!File.Exists(localPath))
-            {
-                await DownloadFileAsync(repoId, file, localPath, revision, subfolder, progress, cancellationToken);
-            }
+            await DownloadFileAsync(repoId, modelFile, modelPath, revision, subfolder, progress, cancellationToken);
         }
 
-        // Download optional files (always at root level, no subfolder)
-        foreach (var file in optionalFiles)
+        // Config and tokenizer files - always at root level (even when model is in subfolder)
+        var rootFiles = new[]
+        {
+            ("config.json", true),           // Required
+            ("vocab.txt", false),            // Optional - Used by BERT-based models
+            ("tokenizer.json", false),       // Optional - Used by sentence-transformers
+            ("tokenizer_config.json", false),
+            ("special_tokens_map.json", false),
+            ("1_Pooling/config.json", false)
+        };
+
+        foreach (var (file, required) in rootFiles)
         {
             var localPath = Path.Combine(modelDir, file);
             if (!File.Exists(localPath))
@@ -82,7 +73,7 @@ internal sealed class HuggingFaceDownloader : IDisposable
                 {
                     await DownloadFileAsync(repoId, file, localPath, revision, null, progress, cancellationToken);
                 }
-                catch (HttpRequestException)
+                catch (HttpRequestException) when (!required)
                 {
                     // Optional file not found, skip
                 }
