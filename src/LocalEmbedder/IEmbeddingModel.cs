@@ -3,7 +3,7 @@ namespace LocalEmbedder;
 /// <summary>
 /// Represents a loaded embedding model that can generate text embeddings.
 /// </summary>
-public interface IEmbeddingModel : IDisposable
+public interface IEmbeddingModel : IDisposable, IAsyncDisposable
 {
     /// <summary>
     /// Gets the model identifier.

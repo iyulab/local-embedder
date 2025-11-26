@@ -121,10 +121,25 @@ internal sealed class EmbeddingModel : IEmbeddingModel
 
     public void Dispose()
     {
-        if (!_disposed)
-        {
-            _engine.Dispose();
-            _disposed = true;
-        }
+        // Synchronous disposal calls async disposal synchronously
+        // This maintains backward compatibility while supporting modern async patterns
+        DisposeAsync().AsTask().GetAwaiter().GetResult();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+
+        // Dispose ONNX Runtime resources
+        _engine?.Dispose();
+
+        // Satisfy async contract (currently no async cleanup needed)
+        await Task.CompletedTask;
+
+        // Suppress finalization since we've cleaned up
+        GC.SuppressFinalize(this);
     }
 }

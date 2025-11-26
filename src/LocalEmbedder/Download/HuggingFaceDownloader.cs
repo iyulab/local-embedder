@@ -48,14 +48,14 @@ internal sealed class HuggingFaceDownloader : IDisposable
         var requiredFiles = new[]
         {
             "model.onnx",
-            "vocab.txt",
             "config.json"
         };
 
-        // Optional files
+        // Optional files (different models use different tokenizer formats)
         var optionalFiles = new[]
         {
-            "tokenizer.json",
+            "vocab.txt",  // Used by some models (e.g., BERT-based)
+            "tokenizer.json",  // Used by sentence-transformers models
             "tokenizer_config.json",
             "special_tokens_map.json",
             "1_Pooling/config.json"

@@ -32,7 +32,7 @@ dotnet add package LocalEmbedder
 using LocalEmbedder;
 
 // Load a model (auto-downloads if not cached)
-using var model = await LocalEmbedder.LoadAsync("all-MiniLM-L6-v2");
+await using var model = await LocalEmbedder.LoadAsync("all-MiniLM-L6-v2");
 
 // Generate embedding
 float[] embedding = await model.EmbedAsync("Your text here");
@@ -44,6 +44,8 @@ float[][] embeddings = await model.EmbedAsync([
     "Third sentence"
 ]);
 ```
+
+> **Note**: Both `await using` (recommended) and `using` patterns are supported for resource disposal.
 
 ## Available Models
 

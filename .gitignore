@@ -45,3 +45,4 @@ publish/
 
 # Local
 local-docs/
+.serena/

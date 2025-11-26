@@ -77,7 +77,17 @@ Computes dot product of two vectors.
 
 ## IEmbeddingModel
 
-Interface for embedding model instances.
+Interface for embedding model instances. Implements both `IDisposable` and `IAsyncDisposable` for flexible resource management.
+
+```csharp
+public interface IEmbeddingModel : IDisposable, IAsyncDisposable
+{
+    string ModelId { get; }
+    int Dimensions { get; }
+    ValueTask<float[]> EmbedAsync(string text, CancellationToken cancellationToken = default);
+    ValueTask<float[][]> EmbedAsync(IReadOnlyList<string> texts, CancellationToken cancellationToken = default);
+}
+```
 
 ### Properties
 
@@ -115,6 +125,35 @@ ValueTask<float[][]> EmbedAsync(
 Generates embeddings for multiple texts.
 
 **Returns:** Array of float arrays
+
+#### Dispose
+
+```csharp
+void Dispose()
+```
+
+Synchronously releases resources. Internally calls `DisposeAsync()` to ensure proper cleanup.
+
+**Usage:** Compatible with traditional `using` statements for backward compatibility.
+
+#### DisposeAsync
+
+```csharp
+ValueTask DisposeAsync()
+```
+
+Asynchronously releases resources. This is the preferred disposal method.
+
+**Usage:** Use with `await using` statements for modern async patterns.
+
+**Example:**
+```csharp
+// Recommended (async disposal)
+await using var model = await LocalEmbedder.LoadAsync("all-MiniLM-L6-v2");
+
+// Also supported (sync disposal)
+using var model = await LocalEmbedder.LoadAsync("all-MiniLM-L6-v2");
+```
 
 ---
 
