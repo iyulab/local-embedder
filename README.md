@@ -1,187 +1,84 @@
-# LocalEmbedder
+# ⚠️ This Repository is Archived
 
-[![CI](https://github.com/iyulab/local-embedder/actions/workflows/ci.yml/badge.svg)](https://github.com/iyulab/local-embedder/actions/workflows/ci.yml)
-[![NuGet](https://img.shields.io/nuget/v/LocalEmbedder.svg)](https://www.nuget.org/packages/LocalEmbedder)
-[![Downloads](https://img.shields.io/nuget/dt/LocalEmbedder.svg)](https://www.nuget.org/packages/LocalEmbedder)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+> **This project has been superseded by [LocalAI.Embedder](https://github.com/iyulab/local-ai).**
+>
+> All future development, bug fixes, and new features will be in the LocalAI project.
 
-A simple, high-performance .NET library for local text embeddings with automatic model downloading from HuggingFace.
+---
 
-```csharp
-await using var model = await LocalEmbedder.LoadAsync("all-MiniLM-L6-v2");
-var embedding = await model.EmbedAsync("Hello, world!");
-```
+## Migration Guide
 
-## Features
-
-- **Zero Configuration** - Just specify a model name, auto-downloads from HuggingFace
-- **High Performance** - SIMD-optimized operations with TensorPrimitives
-- **Minimal Dependencies** - Only ONNX Runtime and System.Numerics.Tensors
-- **GPU Acceleration** - CUDA, DirectML, CoreML support
-- **Pre-configured Models** - Popular embedding models ready to use
-- **Resume Downloads** - Automatically resumes interrupted downloads
-
-## Installation
+### 1. Replace Package
 
 ```bash
-dotnet add package LocalEmbedder
+# Remove old package
+dotnet remove package LocalEmbedder
+
+# Add new package
+dotnet add package LocalAI.Embedder
 ```
 
-## Quick Start
+### 2. Update Namespace
+
+```diff
+- using LocalEmbedder;
++ using LocalAI.Embedder;
+```
+
+### 3. Update Code
+
+The API is nearly identical:
 
 ```csharp
-using LocalEmbedder;
-
-// Load a model (auto-downloads if not cached)
+// Before (LocalEmbedder)
 await using var model = await LocalEmbedder.LoadAsync("all-MiniLM-L6-v2");
+float[] embedding = await model.EmbedAsync("Hello, world!");
 
-// Generate embedding
-float[] embedding = await model.EmbedAsync("Your text here");
-
-// Batch processing
-float[][] embeddings = await model.EmbedAsync([
-    "First sentence",
-    "Second sentence",
-    "Third sentence"
-]);
+// After (LocalAI.Embedder)
+await using var model = await LocalEmbedder.LoadAsync("default");
+float[] embedding = await model.EmbedAsync("Hello, world!");
 ```
 
-> **Note**: Both `await using` (recommended) and `using` patterns are supported for resource disposal.
+### Model Name Mapping
 
-## Available Models
+| LocalEmbedder | LocalAI.Embedder |
+|---------------|------------------|
+| `all-MiniLM-L6-v2` | `fast` |
+| `bge-small-en-v1.5` | `default` |
+| `bge-base-en-v1.5` | `quality` |
+| `multilingual-e5-base` | `multilingual` |
 
-| Model ID | Dimensions | Description |
-|----------|------------|-------------|
-| `all-MiniLM-L6-v2` | 384 | Fast, good quality general-purpose |
-| `all-mpnet-base-v2` | 768 | High quality general-purpose |
-| `bge-small-en-v1.5` | 384 | BAAI's efficient model |
-| `bge-base-en-v1.5` | 768 | BAAI's high quality model |
-| `multilingual-e5-small` | 384 | Multilingual support |
-| `multilingual-e5-base` | 768 | Multilingual, high quality |
+Or continue using full model names directly.
 
-```csharp
-// List all available models
-foreach (var modelId in LocalEmbedder.GetAvailableModels())
-{
-    Console.WriteLine(modelId);
-}
-```
+---
 
-## Configuration
+## Why Migrate?
 
-```csharp
-var model = await LocalEmbedder.LoadAsync("all-MiniLM-L6-v2", new EmbedderOptions
-{
-    CacheDirectory = "./models",           // Model cache location
-    MaxSequenceLength = 512,               // Max tokens
-    NormalizeEmbeddings = true,            // L2 normalization
-    Provider = ExecutionProvider.Auto      // Auto-select best (default)
-});
-```
+**LocalAI** provides a unified suite of local AI capabilities:
 
-### Execution Providers
+| Package | Description |
+|---------|-------------|
+| [LocalAI.Embedder](https://github.com/iyulab/local-ai) | Text embeddings (successor to this package) |
+| [LocalAI.Reranker](https://github.com/iyulab/local-ai) | Semantic reranking for search |
+| [LocalAI.Generator](https://github.com/iyulab/local-ai) | Text generation & chat |
+| More coming... | OCR, Image captioning, Translation, etc. |
 
-```csharp
-ExecutionProvider.Auto      // Default - automatically selects best available
-ExecutionProvider.Cpu       // CPU only
-ExecutionProvider.Cuda      // NVIDIA GPU
-ExecutionProvider.DirectML  // Windows GPU (AMD, Intel, NVIDIA)
-ExecutionProvider.CoreML    // Apple Silicon
-```
+**Benefits:**
+- Active development and maintenance
+- More models and capabilities
+- Unified API across all local AI tasks
+- Better documentation and examples
 
-The default `Auto` provider automatically selects:
-1. **CUDA** if NVIDIA GPU is available (highest performance)
-2. **DirectML** on Windows or **CoreML** on macOS if supported
-3. **CPU** as fallback (always available)
+---
 
-## Advanced Usage
+## Links
 
-### Custom HuggingFace Model
+- **New Repository**: https://github.com/iyulab/local-ai
+- **NuGet Package**: https://www.nuget.org/packages/LocalAI.Embedder
+- **Documentation**: https://github.com/iyulab/local-ai/blob/main/docs/embedder.md
 
-```csharp
-// Load any ONNX model from HuggingFace
-var model = await LocalEmbedder.LoadAsync("intfloat/multilingual-e5-large");
-```
-
-### Local Model File
-
-```csharp
-// Load from local path
-var model = await LocalEmbedder.LoadAsync("/path/to/model.onnx");
-```
-
-### Dependency Injection
-
-```csharp
-// Register as singleton
-services.AddSingleton<IEmbeddingModel>(sp =>
-    LocalEmbedder.LoadAsync("all-MiniLM-L6-v2").GetAwaiter().GetResult());
-
-// Or use factory
-services.AddSingleton<IEmbedderFactory, EmbedderFactory>();
-```
-
-### Similarity Search
-
-```csharp
-using var model = await LocalEmbedder.LoadAsync("all-MiniLM-L6-v2");
-
-var query = await model.EmbedAsync("What is machine learning?");
-var documents = await model.EmbedAsync([
-    "Machine learning is a subset of AI",
-    "The weather is nice today",
-    "Deep learning uses neural networks"
-]);
-
-// Find most similar
-var similarities = documents.Select(doc => 
-    LocalEmbedder.CosineSimilarity(query, doc));
-```
-
-## API Reference
-
-### IEmbeddingModel
-
-```csharp
-public interface IEmbeddingModel : IDisposable
-{
-    string ModelId { get; }
-    int Dimensions { get; }
-    
-    ValueTask<float[]> EmbedAsync(string text, CancellationToken ct = default);
-    ValueTask<float[][]> EmbedAsync(IReadOnlyList<string> texts, CancellationToken ct = default);
-}
-```
-
-### Utility Methods
-
-```csharp
-// Cosine similarity between two vectors
-float similarity = LocalEmbedder.CosineSimilarity(vec1, vec2);
-
-// Euclidean distance
-float distance = LocalEmbedder.EuclideanDistance(vec1, vec2);
-
-// Dot product
-float dot = LocalEmbedder.DotProduct(vec1, vec2);
-```
-
-## Performance Tips
-
-1. **Reuse model instances** - Loading is expensive, embed calls are cheap
-2. **Batch your requests** - `EmbedAsync(string[])` is more efficient than multiple single calls
-3. **Use GPU** - Significant speedup for large batches
-4. **Choose the right model** - Smaller models (MiniLM) are much faster than large ones (E5-large)
-
-## Requirements
-
-- .NET 10.0 or later
-- ONNX Runtime native libraries (included via NuGet)
+---
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
