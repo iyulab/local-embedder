@@ -15,7 +15,9 @@ internal sealed class EmbeddingModel : IEmbeddingModel
     private readonly ITokenizer _tokenizer;
     private readonly IPoolingStrategy _poolingStrategy;
     private readonly EmbedderOptions _options;
+    private readonly ModelInfo? _modelInfo;
     private bool _disposed;
+    private bool _warmedUp;
 
     public string ModelId { get; }
     public int Dimensions => _engine.HiddenSize;
@@ -25,13 +27,15 @@ internal sealed class EmbeddingModel : IEmbeddingModel
         OnnxInferenceEngine engine,
         ITokenizer tokenizer,
         IPoolingStrategy poolingStrategy,
-        EmbedderOptions options)
+        EmbedderOptions options,
+        ModelInfo? modelInfo = null)
     {
         ModelId = modelId;
         _engine = engine;
         _tokenizer = tokenizer;
         _poolingStrategy = poolingStrategy;
         _options = options;
+        _modelInfo = modelInfo;
     }
 
     public async ValueTask<float[]> EmbedAsync(string text, CancellationToken cancellationToken = default)
@@ -118,6 +122,19 @@ internal sealed class EmbeddingModel : IEmbeddingModel
 
         return results;
     }
+
+    public async Task WarmupAsync(CancellationToken cancellationToken = default)
+    {
+        if (_warmedUp) return;
+
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        // Perform a dummy inference to warm up the model
+        await EmbedAsync("warmup", cancellationToken);
+        _warmedUp = true;
+    }
+
+    public ModelInfo? GetModelInfo() => _modelInfo;
 
     public void Dispose()
     {

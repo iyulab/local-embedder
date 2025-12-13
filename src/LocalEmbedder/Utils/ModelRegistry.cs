@@ -86,7 +86,7 @@ internal static class ModelRegistry
 /// <summary>
 /// Configuration information for a pre-configured model.
 /// </summary>
-internal sealed record ModelInfo
+public sealed record ModelInfo
 {
     public required string RepoId { get; init; }
     public required int Dimensions { get; init; }

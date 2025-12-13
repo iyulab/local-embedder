@@ -32,6 +32,8 @@ public static class LocalEmbedder
         string vocabPath;
         string modelId;
 
+        ModelInfo? loadedModelInfo = null;
+
         // Check if it's a local path
         if (File.Exists(modelIdOrPath) || modelIdOrPath.EndsWith(".onnx", StringComparison.OrdinalIgnoreCase))
         {
@@ -51,6 +53,8 @@ public static class LocalEmbedder
         // Check if it's a known model ID
         else if (ModelRegistry.TryGetModel(modelIdOrPath, out var modelInfo))
         {
+            loadedModelInfo = modelInfo;
+
             // Apply model-specific defaults
             if (options.MaxSequenceLength == 512) // default value
             {
@@ -110,7 +114,7 @@ public static class LocalEmbedder
         // Create pooling strategy
         var poolingStrategy = PoolingFactory.Create(options.PoolingMode);
 
-        return new EmbeddingModel(modelId, engine, tokenizer, poolingStrategy, options);
+        return new EmbeddingModel(modelId, engine, tokenizer, poolingStrategy, options, loadedModelInfo);
     }
 
     /// <summary>
